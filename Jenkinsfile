@@ -14,15 +14,6 @@ pipeline {
                 ])
             }
         }
-        stage('Detect Change') {
-            steps {
-                script {
-                    def changed = sh(script: "git diff --name-only HEAD~1 HEAD | grep '.php' | head -n 1", returnStdout: true).trim()
-                    env.TARGET_PHP_FILE = changed ?: "index.php"
-                    echo "Target PHP file: ${env.TARGET_PHP_FILE}"
-                }
-            }
-        }
         stage('Deploy') {
             steps {
                 sh '''
@@ -31,10 +22,28 @@ pipeline {
                 '''
             }
         }
-        stage('Run PHP') {
+        stage('Check PHP') {
             steps {
-                sh "php ${env.TARGET_PHP_FILE}"
+                sh 'php -v'
             }
+        }
+        stage('Run All PHP Files') {
+            steps {
+                sh '''
+                echo "Executing all PHP files in workspace..."
+                find . -name "*.php" -type f | while read file; do
+                    echo "----------------------"
+                    echo "Running $file"
+                    php "$file"
+                    echo "----------------------"
+                done
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            echo "Pipeline finished."
         }
     }
 }
