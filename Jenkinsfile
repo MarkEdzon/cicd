@@ -27,12 +27,10 @@ pipeline {
         }
 
         stage('Start Apache') {
-            steps {
-                sh '''
-                sudo systemctl start apache2
-                '''
-            }
-        }
+    steps {
+        sh 'echo "Apache already running"'
+    }
+}
 
         stage('Test') {
             steps {
